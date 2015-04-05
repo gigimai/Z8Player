@@ -1,0 +1,47 @@
+//
+//  FilmModel.m
+//  Z8Player
+//
+//  Created by Do Nhat Khanh on 8/7/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "FilmModel.h"
+
+@implementation FilmModel
+
+- (void)encodeWithCoder:(NSCoder *)aCoder
+{
+    [aCoder encodeObject:self.mediaThumbnailImage forKey:@"mediaThumbnailImage"];
+    [aCoder encodeObject:self.mediaName forKey:@"mediaName"];
+    [aCoder encodeObject:self.mediaCategory forKey:@"mediaCategory"];
+    [aCoder encodeObject:self.mediaURL forKey:@"mediaURL"];
+    [aCoder encodeObject:self.filmDescription forKey:@"filmDescription"];
+    [aCoder encodeObject:self.filmDirector forKey:@"filmDirector"];
+    [aCoder encodeObject:self.filmActors forKey:@"filmActors"];
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        NSString *mediaThumbnailImage = [aDecoder decodeObjectForKey:@""];
+        NSString *mediaName = [aDecoder decodeObjectForKey:@"mediaName"];
+        NSString *mediaCategory = [aDecoder decodeObjectForKey:@"mediaCategory"];
+        NSString *mediaURL = [aDecoder decodeObjectForKey:@"mediaURL"];
+        NSString *filmDescription = [aDecoder decodeObjectForKey:@"filmDescription"];
+        NSString *filmDirector = [aDecoder decodeObjectForKey:@"filmDirector"];
+        NSString *filmActors = [aDecoder decodeObjectForKey:@"filmActors"];
+        
+        self.mediaThumbnailImage = mediaThumbnailImage;
+        self.mediaName = mediaName;
+        self.mediaCategory = mediaCategory;
+        self.mediaURL = mediaURL;
+        self.filmDescription = filmDescription;
+        self.filmDirector = filmDirector;
+        self.filmActors = filmActors;
+    }
+    return self;
+}
+
+@end

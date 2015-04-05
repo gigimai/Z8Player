@@ -1,0 +1,280 @@
+//
+//  HomeViewController.m
+//  Z8Player
+//
+//  Created by HieuSE on 8/13/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ZPHomeViewController.h"
+#import "KASlideShow.h"
+#import "UIFont+FlatUI.h"
+
+
+@interface ZPHomeViewController ()<KASlideShowDelegate,KASlideShowDataSource>{
+    CGFloat dummyViewHeight;
+//    UIImageView *topImage;
+
+}
+@property (strong,nonatomic) KASlideShow * slideshow;
+
+@end
+
+@implementation ZPHomeViewController
+@synthesize theTableView;
+@synthesize dataArr;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self)
+    {
+        self.title = NSLocalizedString(@"Z8 Play", @"Z8 Play");
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self preperaData];
+    
+    // Register the table cell
+    [self.theTableView registerClass:[ORGContainerCell class] forCellReuseIdentifier:@"ORGContainerCell"];
+    
+    // Add observer that will allow the nested collection cell to trigger the view controller select row at index path
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didSelectItemFromCollectionView:) name:@"didSelectItemFromCollectionView" object:nil];
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(didTapSlideShow:) name:@"didTapSlideShow" object:nil];
+    [self.theTableView setFrame:CGRectMake(0, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.height)];
+    self.theTableView.delegate = self;
+    self.theTableView.dataSource = self;
+    
+    self.optionIndices = [NSMutableIndexSet indexSetWithIndex:0];
+    
+
+    [self.theTableView setShowsVerticalScrollIndicator:NO];
+    
+  //  topImage = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 170)];
+  //  [topImage setImage:[UIImage imageNamed:@"guardians_poster_via_marvel.jpg"]];
+    
+    
+}
+
+-(void)viewDidDisappear:(BOOL)animated
+{
+    NSLog(@"exit home");
+    [_slideshow stop];
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [theTableView reloadData];
+}
+
+- (void)preperaData
+{
+    NSArray *chanelsArr;
+    NSArray *filmsArr;
+    if (!chanelsArr) {
+        chanelsArr = [[LibraryAPI sharedInstance]getChannelList];
+    }
+    
+    NSMutableArray *channelsDict = [[NSMutableArray alloc]init];
+//    for (int i = 0; i < 5; i++) {
+//        ChannelModel *channel = chanelsArr[i];
+//        NSDictionary *channelDict = @{@"title": channel.mediaName,
+//                                      @"imageURL": channel.mediaThumbnailImage,
+//                                      @"linkPlay": channel.mediaURL};
+//        [channelsDict addObject:channelDict];
+//    }
+    for (ChannelModel *channel in chanelsArr) {
+        NSDictionary *channelDict = @{@"title": channel.mediaName,
+                                      @"imageURL": channel.mediaThumbnailImage,
+                                      @"linkPlay": channel.mediaURL};
+        [channelsDict addObject:channelDict];
+    }
+    NSDictionary *channelsViewDict = @{@"description":@"Most viewed channels",
+                                       @"articles":channelsDict};
+    if (!filmsArr) {
+        filmsArr = [[LibraryAPI sharedInstance]getFilmList];
+    }
+    
+    NSMutableArray *filmsDict = [[NSMutableArray alloc]init];
+    for (FilmModel *film in filmsArr) {
+        NSDictionary *filmlDict = @{@"title": film.mediaName,
+                                    @"imageURL": film.mediaThumbnailImage,
+                                    @"linkPlay" : film.mediaURL};
+        [filmsDict addObject:filmlDict];
+    }
+    NSDictionary *filmsViewDict = @{@"description":@"Most viewed movies",
+                                    @"articles":filmsDict};
+    
+    dataArr = [[NSArray alloc]initWithObjects:channelsViewDict,filmsViewDict, nil];
+    
+    [self.theTableView reloadData];
+}
+
+
+#pragma mark- UITableViewMethod
+
+-(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+    return 0;
+}
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        dummyViewHeight = 214;
+        return 214;
+    }
+    dummyViewHeight = 44;
+    return 44.0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 180.0;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return [dataArr count];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+// Customize the appearance of table view cells.
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellIdentifier = @"ORGContainerCell";
+    ORGContainerCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
+    if (!cell) {
+        cell = [[ORGContainerCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+    }
+    NSDictionary *cellData = dataArr[indexPath.section];
+    NSArray *articleData = [cellData objectForKey:@"articles"];
+    [cell setCollectionData:articleData];
+    return cell;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UIView *headerView;
+    UILabel *myLbl;
+    NSDictionary *sectionData = dataArr[section];
+    NSString *header = [sectionData objectForKey:@"description"];
+    
+    if (section == 0) {
+        headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 214)];
+        _slideshow = [[KASlideShow alloc]initWithFrame:CGRectMake(headerView.frame.origin.x, headerView.frame.origin.y , 320, 170)];
+        _slideshow.delegate = self;
+        // Delay between transitions
+        [_slideshow setDelay:3];
+        // Transition duration
+        [_slideshow setTransitionDuration:1.];
+        // Choose a transition type (fade or slide)
+        [_slideshow setTransitionType:KASlideShowTransitionSlide];
+        // Choose a content mode for images to display
+        [_slideshow setImagesContentMode:UIViewContentModeScaleAspectFill];
+        // Add images from resources
+        [_slideshow addImagesFromResources:@[@"guardians_poster_via_marvel.jpg",@"TheExpendables3.png",@"how_to_train_your_dragon_2.png"]];
+
+        [_slideshow start];
+        [_slideshow addGesture:KASlideShowGestureTap];
+        [_slideshow addGesture:KASlideShowGestureSwipe];
+                [headerView addSubview:_slideshow];
+        myLbl = [[UILabel alloc]initWithFrame:CGRectMake(headerView.frame.origin.x + 10, headerView.frame.origin.y +_slideshow.frame.size.height, 320, 44)];
+       
+    }else{
+        headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, 320, 44)];
+        myLbl = [[UILabel alloc]initWithFrame:CGRectMake(headerView.frame.origin.x + 10, headerView.frame.origin.y, 320, 44)];
+        
+    }
+
+    [myLbl setText:header];
+    [myLbl setTextColor:[UIColor tangerineColor]];
+    [myLbl setFont:[UIFont boldFlatFontOfSize:17.0f]];
+    [headerView addSubview:myLbl];
+    [headerView setBackgroundColor:[UIColor whiteColor]];
+    return  headerView;
+}
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Return NO if you do not want the specified item to be editable.
+    return NO;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // This code is commented out in order to allow users to click on the collection view cells.
+    //    if (!self.detailViewController) {
+    //        self.detailViewController = [[ORGDetailViewController alloc] initWithNibName:@"ORGDetailViewController" bundle:nil];
+    //    }
+    //  //  NSDate *object = _objects[indexPath.row];
+    //   // self.detailViewController.detailItem = object;
+    //    [self.navigationController pushViewController:self.detailViewController animated:YES];
+}
+
+
+#pragma mark - KASlideShow delegate
+
+- (void) kaSlideShowDidNext:(KASlideShow *)slideShow
+{
+    NSLog(@"kaSlideShowDidNext, index : %lu",(unsigned long)slideShow.currentIndex);
+}
+
+-(void)kaSlideShowDidPrevious:(KASlideShow *)slideShow
+{
+    NSLog(@"kaSlideShowDidPrevious, index : %lu",(unsigned long)slideShow.currentIndex);
+}
+
+#pragma mark - NSNotification to select table cell
+
+- (void) didSelectItemFromCollectionView:(NSNotification *)notification
+{
+    NSDictionary *cellData = [notification object];
+    if (cellData)
+    {
+        if (!self.detailViewController) {
+            //self.detailViewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil];
+            self.detailViewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil withURLString:[[cellData objectForKey:@"linkPlay"] absoluteString]];
+        }
+        [self.navigationController pushViewController:self.detailViewController animated:YES];
+    }
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"didSelectItemFromCollectionView" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"didTapSlideShow" object:nil];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+-(void)didTapSlideShow : (NSNotification *)notification
+{
+
+  
+    KASlideShow *slideShow = [notification object];
+    if (slideShow)
+    {
+        if (!self.detailViewController) {
+            //self.detailViewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil];
+            self.detailViewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil];
+        }
+        [self.navigationController pushViewController:self.detailViewController animated:YES];
+        
+    }
+}
+
+@end

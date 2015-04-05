@@ -1,0 +1,32 @@
+//
+//  Prefix header
+//
+//  The contents of this file are implicitly included at the beginning of every source file.
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+    #import <UIKit/UIKit.h>
+    #import <Foundation/Foundation.h>
+#import <QuartzCore/QuartzCore.h>
+#import <AVFoundation/AVFoundation.h>
+#import <Social/Social.h>
+#endif
+#define kFILM @"flim"
+#define kCHANEL @"chanel"
+#define kColor [UIColor colorWithRed:113.0f/255.0f green:198.0f/255.0f blue:113.0f/255.0f alpha:1]
+#define kCHANEL @"chanel"
+#define kRTMP_LINK 1
+#define kHTTP_LINK 2
+#define kERROR_LINK 0
+#define kHTTP_TYPE @"http:"
+#define kRTMP_TYPE @"rtmp:"
+#define kFilmEditedArr @"FILM_EDITED_ARR.model"
+#define kChannelEditedArr @"CHANNEL_EDITED_ARR.model"
+#define kFavouriteChannel @"FAVOURITE_CHANNEL"
+#define kFavouriteFilm  @"FAVOURITE_FILM"

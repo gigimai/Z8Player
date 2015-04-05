@@ -1,0 +1,814 @@
+//
+//  ZPDetailViewController.m
+//  Z8Player
+//
+//  Created by HieuSE on 8/15/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ZPDetailViewController.h"
+#import "UISlider+FlatUI.h"
+#import "FUIAlertView.h"
+#import "UIBarButtonItem+FlatUI.h"
+#import "MBProgressHUD.h"
+#import <MediaPlayer/MediaPlayer.h>
+#import "LibraryAPI.h"
+#import "UIImageView+AFNetworking.h"
+
+@interface ZPDetailViewController ()<UIActionSheetDelegate, MBProgressHUDDelegate, UIAlertViewDelegate,UIActionSheetDelegate>{
+    BOOL isPlaying;
+    NSTimer* sliderTimer;
+    NSInteger linkType ;
+    MBProgressHUD *hud;
+    UIView *descriptionView;
+}
+@property (strong, nonatomic) IBOutlet UIView *playerView;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (strong, nonatomic) IBOutlet UIScrollView *infoView;
+@property (strong, nonatomic) IBOutlet UILabel *titleLabel;
+@property (strong, nonatomic) IBOutlet UISlider *volumeSlider;
+@property (strong, nonatomic) IBOutlet UILabel *timerLabel;
+@property (strong, nonatomic) IBOutlet UILabel *totalTimeLabel;
+
+@property (strong, nonatomic) IBOutlet UIView *playerControlView;
+@property (strong, nonatomic) IBOutlet UIButton *playButton;
+@property (strong, nonatomic) IBOutlet UISlider *playSlider;
+@property (nonatomic) size_t videoDuration;
+@property (nonatomic) NSTimer * loadingTimer;
+@property (nonatomic ) NSInteger counter;
+@property (strong, nonatomic) IBOutlet UIButton *btnPrevious;
+@property (strong, nonatomic) IBOutlet UIButton *btnNext;
+@end
+
+@implementation ZPDetailViewController
+@synthesize urlLink;
+@synthesize linkArray;
+@synthesize btnNext;
+@synthesize btnPrevious;
+@synthesize mediaDict;
+@synthesize filmsArr;
+@synthesize film;
+@synthesize channelsArr;
+@synthesize channel;
+@synthesize isPlayMovie;
+@synthesize favChannelArr;
+@synthesize favFilmArr;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withURLString:(NSString *)linkStr
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        urlLink = [NSString stringWithFormat:@"%@",linkStr];
+        
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withChannel:(ChannelModel *)channel
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        urlLink = channel.mediaURL;
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withFilm:(FilmModel *)film
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        urlLink = film.mediaURL;
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withLinkArrs:(NSMutableArray *)linkArr andLink:(NSString *)linkURL
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        self.linkArray = linkArr;
+        urlLink = [NSString stringWithFormat:@"%@",linkURL];
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withChannelDictionaryArrs:(NSMutableArray *)channelDictsArr andDictionary:(NSDictionary *)channelDict
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        self.linkArray = channelDictsArr;
+        self.mediaDict = channelDict;
+        urlLink = [NSString stringWithFormat:@"%@",[channelDict objectForKey:@"MediaLink"]];
+    }
+    return self;
+}
+
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withFilmArrs:(NSMutableArray *)filmArr andFilm:(FilmModel *)filmModel
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        isPlayMovie = YES;
+        self.filmsArr = filmArr;
+        self.film = filmModel;
+        urlLink = [NSString stringWithFormat:@"%@",self.film.mediaURL];
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withChannelArrs:(NSMutableArray *)channelArr andChannel:(ChannelModel *)channelModel
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        isPlayMovie = NO;
+        if (!self.channelsArr) {
+            self.channelsArr = [[NSMutableArray alloc]init];
+        }
+        self.channelsArr = channelArr;
+        self.channel = channelModel;
+        urlLink = [NSString stringWithFormat:@"%@",self.channel.mediaURL];
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    //urlLink =@"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+    //urlLink = @"rtmp://cp79650.live.edgefcs.net/live/QVCLive1@14308";
+   // urlLink = @"http://85.132.44.99:1935/turktv/startv.sdp/embedstv39.m3u8";
+    //urlLink =@"http://10.88.106.248/film/GUARDIANS.mp4";
+
+    // Do any additional setup after loading the view from its nib.
+    if (!urlLink) {
+        urlLink = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+    }
+    
+    [self setupView];
+    [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+    
+    isPlaying = YES;
+    [self checkBtnEnable];
+//    favChannelArr = [[LibraryAPI sharedInstance]favouriteChannelArr];
+//    self.optionIndices = [NSMutableIndexSet indexSetWithIndex:3];
+    
+    favFilmArr = [[LibraryAPI sharedInstance]readArrayWithCustomObjFromUserDefaults:kFavouriteFilm];
+    if (!favFilmArr) {
+        favFilmArr = [[NSMutableArray alloc]init];
+    }
+    
+    favChannelArr = [[LibraryAPI sharedInstance]readArrayWithCustomObjFromUserDefaults:kFavouriteChannel];
+    if (!favChannelArr) {
+        favChannelArr = [[NSMutableArray alloc]init];
+    }
+}
+
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    //urlLink =@"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+    //NSString *urlLink = @"rtmp://10.88.107.5/vod/mp4:Cars.2.Air.Mater";
+    //@"rtmp://10.88.107.5/vod/mp4:Cars.2.Air.Mater";
+    // self.mediaplayer = [[MediaPlayer alloc] initWithURL:urlLink];
+//    NSLog(@"Link:%@",urlLink);
+//    [self.mediaplayer.managerUtility loadingPlayer:self.playerView viewController:self urlLink:urlLink];
+//    //[self.activityIndicator startAnimating];
+//    
+//    hud = [[MBProgressHUD alloc]initWithView:self.navigationController.view];
+//    [self.navigationController.view addSubview:hud];
+//    hud.dimBackground = YES;
+//    hud.mode = MBProgressHUDModeIndeterminate;
+//    hud.labelText = @"Loading...";
+//    hud.delegate = self;
+//    [hud show:YES];
+//    
+//    self.loadingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
+//    self.counter = 0 ;
+//    
+//    [self.mediaplayer.managerUtility playWithURL:urlLink];
+//    [self.playSlider setValue:0.0f];
+//    linkType = [self.mediaplayer checkLink:urlLink];
+//    [urlLink rangeOfString:@"m3u8"];
+//    if ((linkType == kHTTP_LINK) &&
+//        (([urlLink rangeOfString:@"m3u8"].location == NSNotFound))){
+//    [self setSlider];
+//
+    
+//    }
+//    else
+//    {
+//        self.playSlider.userInteractionEnabled = NO;
+//    }
+    [self preparePlaying:urlLink];
+    [self createAndDisplayMPVolumeView];
+}
+
+-(void) updateTimer{
+    if ( self.counter < 30)
+    {
+        self.counter ++;
+        if ((linkType == kHTTP_LINK) &&
+            (([urlLink rangeOfString:@"m3u8"].location != NSNotFound))){
+            
+            AVPlayerItem * playerItemHttp = self.mediaplayer.managerUtility.getAVPlayerItem;
+           
+            if (playerItemHttp.status == AVPlayerItemStatusReadyToPlay){
+                [hud removeFromSuperview];
+                [self.loadingTimer invalidate];
+            }
+
+        }
+
+    }
+    else{
+
+//        [self.loadingTimer invalidate];
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Link or connection error" message:@"Link or connection corrupted. Please check the connection or try other link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        alert.tag = 1000;
+        [alert show];
+        [self.loadingTimer invalidate];
+        [self resetForPlaying];
+    }
+    
+   
+}
+
+-(void)setupView
+{
+
+    UIBarButtonItem *actionButton = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(showAction)];
+    [self.navigationItem setRightBarButtonItem:actionButton];
+    [self.playerControlView setBackgroundColor:[UIColor lightTextColor]];
+    [_infoView setBackgroundColor:[UIColor lightTextColor]];
+    
+    
+    if (isPlayMovie) {
+        _movieTitle = self.film.mediaName;
+    } else{
+        _movieTitle = self.channel.mediaName;
+    }
+    
+    [_titleLabel setText:_movieTitle];
+    [_titleLabel setFont:[UIFont boldFlatFontOfSize:18]];
+    [_titleLabel setTextColor:[UIColor turquoiseColor]];
+    UIBarButtonItem *backBarButton = [[UIBarButtonItem alloc]initWithTitle:@"Back" style:UIBarButtonItemStylePlain target:self action:nil];
+    [backBarButton configureFlatButtonWithColor:[UIColor emerlandColor] highlightedColor:[UIColor greenSeaColor] cornerRadius:3];
+    [self.navigationItem setBackBarButtonItem:backBarButton];
+  
+}
+
+-(void)showAction
+{
+    [self.mediaplayer.managerUtility pause];
+    UIActionSheet *actionSheet = [[UIActionSheet alloc]initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Share to facebook",@"Share to Twitter",@"Add to favorite",nil];
+    [actionSheet showInView:self.view];
+}
+
+-(void)dismissCurrentView
+{
+    [self.mediaplayer.managerUtility stop];
+    [self dismissViewControllerAnimated:YES completion:nil];
+    
+}
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    NSLog(@"Exit");
+    [self resetForPlaying];
+}
+
+-(void)removeAllSubViewFrom:(UIView *)superView
+{
+    for (UIView *view in superView.subviews) {
+        [view removeFromSuperview];
+    }
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+
+
+
+#pragma mark Implementation Delegate of RTMP player
+
+-(void)openOk{
+    NSLog(@"Open ok");
+    
+    
+}
+-(void)openFailed{
+    NSLog(@"Open failed");
+}
+
+-(void)readyToPlay{
+    NSLog(@"ready to play");
+    //[self.activityIndicator stopAnimating];
+    [hud removeFromSuperview];
+    [self.loadingTimer invalidate];
+    [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+    isPlaying = YES;
+
+}
+
+-(void)bufferingStart{
+    NSLog(@"buffering start");
+//    [self.view bringSubviewToFront:self.activityIndicator];
+//    [self.activityIndicator startAnimating];
+    
+}
+
+-(void)mediaDuration:(size_t)duration{
+    NSLog(@"Duration of film : %zd", duration);
+    self.videoDuration = duration;
+    
+    [self.totalTimeLabel setText:[self timeFormatted:(int) (duration/1000)]];
+}
+
+- (void)mediaPosition:(size_t)position{
+    if (self.videoDuration != 0 )
+    {
+    NSLog(@"position: %zd", position);
+    Float32 percent_status = ((Float32)position/self.videoDuration);
+    [self.timerLabel setText:[self timeFormatted:(int) (position/1000)]];
+    NSLog(@"time: %f", percent_status);
+    [self.playSlider setValue:percent_status];
+    }
+    else{
+        [self.playSlider setValue:0.00f];
+    }
+}
+
+- (IBAction)playOrPause:(id)sender {
+    if (isPlaying) {
+        [self.playButton setImage:[UIImage imageNamed:@"play.png"] forState:UIControlStateNormal];
+        isPlaying = NO;
+        [self.mediaplayer.managerUtility pause];
+    }else{
+        [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+        isPlaying = YES;
+        [self.mediaplayer.managerUtility resume];
+    }
+}
+
+#pragma mark Implement Slider for HTTP
+
+-(IBAction)sliding:(id)sender{
+    
+    [self.mediaplayer.managerUtility pause];
+    CMTime newTime = CMTimeMakeWithSeconds(self.playSlider.value, 1);
+    [self.mediaplayer.managerUtility seekToPos:0 seekTime:newTime];
+    //[self.mediaplayer.managerUtility playWithURL:urlLink];
+}
+
+-(void)setSlider{
+    
+    sliderTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self  selector:@selector(updateSlider) userInfo:nil repeats:YES];
+    self.playSlider.maximumValue = [self durationInSeconds];
+    [self.playSlider addTarget:self action:@selector(sliding:) forControlEvents:UIControlEventValueChanged];
+    self.playSlider.minimumValue = 0.0;
+    self.playSlider.continuous = YES;
+}
+
+- (void)updateSlider {
+    
+    self.playSlider.maximumValue = [self durationInSeconds];
+    self.playSlider.value = [self currentTimeInSeconds];
+    [self.timerLabel setText:[self timeFormatted:(int)([self currentTimeInSeconds])]];
+}
+
+- (Float64)durationInSeconds {
+    AVPlayerItem * playerItemHttp = self.mediaplayer.managerUtility.getAVPlayerItem;
+   static Float64 dur = 0.f;
+//   static dispatch_once_t onePredicate;
+    if (playerItemHttp.status == AVPlayerItemStatusReadyToPlay){
+//        NSLog(@"ready for play");
+
+//        dispatch_once(&onePredicate, ^{
+            dur = CMTimeGetSeconds(playerItemHttp.duration);
+//            NSLog(@"duratuon %0.2f", dur);
+         [self.totalTimeLabel setText:[self timeFormatted:(int)(dur)]];
+//        });
+       
+    }
+    //NSLog(@"duratuon %0.2f", dur);
+    if ( dur != 0 )
+    {
+        //[self.activityIndicator stopAnimating];
+        [hud removeFromSuperview];
+        [self.loadingTimer invalidate];
+       
+    }
+    return dur;
+}
+
+
+- (Float64)currentTimeInSeconds {
+    Float64 dur = CMTimeGetSeconds([self.mediaplayer.managerUtility getCurrentTime]);
+    return dur;
+}
+
+- (IBAction)adjustVolume:(id)sender {
+  
+    
+}
+
+- (IBAction)didPreviousPress:(id)sender {
+    [btnNext setEnabled:YES];
+    int index = 0;
+    NSString *linkPrevious = @"";
+    
+//    if (index >= 0) {
+//        if (index - 1 >= 0){
+//            linkPrevious = [self.linkArray[index - 1] objectForKey:@"MediaLink"];
+//            urlLink = linkPrevious;
+//        } else{
+//            UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error" message:@"Empty link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+//            [alert show];
+//            return;
+//        }
+//    } else{
+//        linkPrevious = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+//    }
+    
+    if (isPlayMovie) {
+        index = [self.filmsArr indexOfObject:self.film];
+        if (index >= 0) {
+            if (index - 1 >= 0) {
+                film = filmsArr[index - 1];
+                linkPrevious = [NSString stringWithFormat:@"%@",film.mediaURL];
+                _titleLabel.text = film.mediaName;
+                urlLink = linkPrevious;
+            } else{
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error" message:@"Full link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+            }
+        } else{
+            linkPrevious = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+        }
+    } else{
+        index = [channelsArr indexOfObject:channel];
+        if (index >= 0) {
+            if (index - 1 >= 0) {
+                channel = channelsArr[index -1];
+                linkPrevious = [NSString stringWithFormat:@"%@",channel.mediaURL];
+                _titleLabel.text = channel.mediaName;
+                urlLink = linkPrevious;
+            } else{
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error" message:@"Full link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+            }
+        } else{
+            linkPrevious = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+        }
+    }
+    
+    [self resetForPlaying];
+    [self preparePlaying:linkPrevious];
+}
+
+- (IBAction)didNextPress:(id)sender {
+    [btnPrevious setEnabled:YES];
+    int index = 0;
+    NSString *linkNext = @"";
+    
+    if (isPlayMovie) {
+        index = [self.filmsArr indexOfObject:self.film];
+        if (index >= 0) {
+            if (index + 1 <= [filmsArr count] - 1) {
+                film = filmsArr[index + 1];
+                linkNext = [NSString stringWithFormat:@"%@",film.mediaURL];
+                _titleLabel.text = film.mediaName;
+                urlLink = linkNext;
+            } else{
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error" message:@"Full link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+            }
+        } else{
+            linkNext = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+        }
+    } else{
+        index = [channelsArr indexOfObject:channel];
+        if (index >= 0) {
+            if (index + 1 <= [self.channelsArr count] - 1) {
+                channel = channelsArr[index + 1];
+                linkNext = [NSString stringWithFormat:@"%@",channel.mediaURL];
+                _titleLabel.text = channel.mediaName;
+                urlLink = linkNext;
+            } else{
+                UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Error" message:@"Full link" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                [alert show];
+            }
+        } else{
+            linkNext = @"http://videohcm114.fptplay.net.vn/mp4//OTT/Ca_Nhac/Nhac_Viet_Nam/NhacVietNam_Da_Quen_That_Sao_Liveshow_New_Hits_Ngoc_Tram.mp4";
+        }
+    }
+    
+    [self resetForPlaying];
+    [self preparePlaying:linkNext];
+}
+
+- (IBAction)touchUpInside:(id)sender {
+    [self.mediaplayer.managerUtility resume];
+}
+
+#pragma mark- UIAlertViewDeleage
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == 1000) {
+        if (buttonIndex == [alertView cancelButtonIndex]) {
+            [hud removeFromSuperview];
+        }
+    }
+}
+
+#pragma mark - UIActionSheetDelegate
+
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if (buttonIndex == 0) {
+        SLComposeViewController *shareFB =[SLComposeViewController composeViewControllerForServiceType:SLServiceTypeFacebook];
+        if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeFacebook]) {
+            SLComposeViewControllerCompletionHandler __block completionHandler = ^(SLComposeViewControllerResult result){
+                [shareFB dismissViewControllerAnimated:YES completion:nil];
+                switch (result) {
+                    case SLComposeViewControllerResultCancelled:
+                        default:
+                    {
+                        NSLog(@"Cancel");
+                        [self.mediaplayer.managerUtility resume];
+                    }
+                        break;
+                        case SLComposeViewControllerResultDone:
+                    {
+                        
+                        [self.mediaplayer.managerUtility resume];
+                        NSLog(@"Posted");
+                    }
+                        break;
+                
+                }
+            };
+            
+            NSString *imageLink = @"";
+            NSString *initialText = @"";
+            NSString * mediaStr;
+            
+            if (isPlayMovie) {
+                imageLink = self.film.mediaThumbnailImage;
+                initialText = [NSString stringWithFormat:@"Hey I 'm watching this movie with name:%@",self.film.mediaName];
+                mediaStr = [NSString stringWithFormat:@"%@",self.film.mediaURL];
+            } else{
+                imageLink = self.channel.mediaThumbnailImage;
+                initialText = [NSString stringWithFormat:@"Hey I 'm watching this channel with name:%@",self.channel.mediaName];
+                mediaStr = [NSString stringWithFormat:@"%@",self.channel.mediaURL];
+            }
+            
+            NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageLink]];
+            
+            [shareFB addImage:[UIImage imageWithData:data]];
+            [shareFB setInitialText:initialText];
+            [shareFB addURL:[NSURL URLWithString:mediaStr]];
+            [shareFB setCompletionHandler:completionHandler];
+            [self presentViewController:shareFB animated:YES completion:nil];
+        }
+    }else if(buttonIndex == 1){
+        
+        if ([SLComposeViewController isAvailableForServiceType:SLServiceTypeTwitter]) {
+            SLComposeViewController *tweetsheet = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeTwitter];
+            [tweetsheet setInitialText:@"Tweeting from my own app"];
+            [tweetsheet addImage:[UIImage imageNamed:@"how_to_train_your_dragon_2.png"]];
+            [tweetsheet addURL:[NSURL URLWithString:@"https://www.youtube.com/watch?v=Z9a4PvzlqoQ"]];
+            [self presentViewController:tweetsheet animated:YES completion:nil];
+        }else{
+            NSLog(@"boooo");
+        }
+        
+    }
+    else if (buttonIndex == 2){
+        NSString *infor = @"";
+        BOOL isExist = NO;
+        if (!isPlayMovie) {
+            if ([favChannelArr count] == 0) {
+                self.channel.isFavorite = YES;
+                [favChannelArr addObject:self.channel];
+                [[LibraryAPI sharedInstance]writeArrayWithCustomObjToUserDefaults:kFavouriteChannel withArray:favChannelArr];
+            } else{
+                for (ChannelModel *channelS in self.favChannelArr) {
+                    if (channelS.channelID == self.channel.channelID) {
+                        isExist = YES;
+                    } else{
+                        isExist = NO;
+                    }
+                }
+                if (isExist) {
+                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"ERROR" message:@"Exist in Favourite" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                    [alert show];
+                    return;
+                } else{
+                    self.channel.isFavorite = YES;
+                    [favChannelArr addObject:self.channel];
+                    [[LibraryAPI sharedInstance]writeArrayWithCustomObjToUserDefaults:kFavouriteChannel withArray:favChannelArr];
+                }
+            }
+            infor = @"Add channel to favourite successfully";
+        } else{
+            if ([favFilmArr count] == 0) {
+                self.film.isFavorite = YES;
+                [favFilmArr addObject:self.film];
+                [[LibraryAPI sharedInstance]writeArrayWithCustomObjToUserDefaults:kFavouriteFilm withArray:favFilmArr];
+
+            } else{
+                for (FilmModel *filmS in favFilmArr) {
+                    if (filmS.filmID == self.film.filmID) {
+                        isExist = YES;
+                    } else{
+                        isExist = NO;
+                    }
+                }
+                if (isExist) {
+                    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"ERROR" message:@"Exist in Favourite" delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+                    [alert show];
+                    return;
+                } else{
+                    self.film.isFavorite = YES;
+                    [favFilmArr addObject:self.film];
+                    [[LibraryAPI sharedInstance]writeArrayWithCustomObjToUserDefaults:kFavouriteFilm withArray:favFilmArr];
+                }
+            }
+            infor = @"Add film to favourite successfully";
+        }
+        UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Info" message:infor delegate:self cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
+        [alert show];
+        [self.mediaplayer.managerUtility resume];
+
+    }else if(buttonIndex == [actionSheet cancelButtonIndex]){
+        [self.mediaplayer.managerUtility resume];
+    }
+}
+
+-(void)actionSheetCancel:(UIActionSheet *)actionSheet
+{
+    [self.mediaplayer.managerUtility resume];
+    NSLog(@"cancel");
+}
+#pragma mark - Proccess play video: 
+-(void) preparePlaying:(NSString*) urlLinkforPlaying
+{
+    NSLog(@"Link:%@",urlLinkforPlaying);
+    
+    self.mediaplayer = [[MediaPlayer alloc] initWithURL:urlLinkforPlaying];
+    [self.mediaplayer.managerUtility loadingPlayer:self.playerView viewController:self urlLink:urlLinkforPlaying];
+    //[self.activityIndicator startAnimating];
+    
+    hud = [[MBProgressHUD alloc]initWithView:self.navigationController.view];
+    [self.navigationController.view addSubview:hud];
+    hud.dimBackground = YES;
+    hud.mode = MBProgressHUDModeIndeterminate;
+    hud.labelText = @"Loading...";
+    hud.delegate = self;
+    [hud show:YES];
+    
+    self.loadingTimer = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(updateTimer) userInfo:nil repeats:YES];
+    self.counter = 0 ;
+    
+    [self.mediaplayer.managerUtility playWithURL:urlLinkforPlaying];
+    [self.playSlider setValue:0.0f];
+    linkType = [self.mediaplayer checkLink:urlLinkforPlaying];
+    if (
+        (linkType == kHTTP_LINK) &&
+        (
+         ([urlLinkforPlaying rangeOfString:@"m3u8"].location == NSNotFound)
+         ||([urlLinkforPlaying rangeOfString:@"mp4"].location != NSNotFound)
+         )
+        
+        ){
+        self.playSlider.userInteractionEnabled = YES;
+        [self setSlider];
+        
+    }
+    else
+    {
+        self.playSlider.userInteractionEnabled = NO;
+    }
+}
+
+-(void) resetForPlaying{
+    [self.mediaplayer.managerUtility stop];
+    //[self.activityIndicator stopAnimating];
+    self.mediaplayer = nil;
+    [hud removeFromSuperview];
+    [sliderTimer invalidate];
+    sliderTimer = nil;
+    [self.loadingTimer invalidate];
+    self.loadingTimer = nil;
+    
+    [self checkBtnEnable];
+}
+
+- (void)checkBtnEnable
+{
+    int index = 0;
+    int count = 0;
+//    index = [linkArray indexOfObject:urlLink];
+//    if (index == 0) {
+//        [btnPrevious setEnabled:NO];
+//    } else if(index ==  [self.linkArray count] - 1){
+//        [btnNext setEnabled:NO];
+//    }
+    if (isPlayMovie) {
+        index = [self.filmsArr indexOfObject:self.film];
+        count = [self.filmsArr count];
+    } else{
+        index = [self.channelsArr indexOfObject:self.channel];
+        count = [self.channelsArr count];
+    }
+    
+    if (index == 0) {
+        [btnPrevious setEnabled:NO];
+    } else if(index ==  count - 1){
+        [btnNext setEnabled:NO];
+    }
+    if(count == 1){
+        [btnPrevious setEnabled:NO];
+        [btnNext setEnabled:NO];
+    }
+
+}
+
+-(void) createAndDisplayMPVolumeView
+{
+    // Create a simple holding UIView and give it a frame
+    UIView *volumeHolder = [[UIView alloc] initWithFrame: CGRectMake(42, 415, 230, 20)];
+    [volumeHolder setBackgroundColor:[UIColor redColor]];
+    NSLog(@"%0.2f", volumeHolder.frame.origin.x);
+    NSLog(@"%0.2f", volumeHolder.frame.origin.y);
+    // set the UIView backgroundColor to clear.
+    [volumeHolder setBackgroundColor: [UIColor clearColor]];
+    
+    // add the holding view as a subView of the main view
+    [self.view addSubview: volumeHolder];
+    
+    // Create an instance of MPVolumeView and give it a frame
+    MPVolumeView *myVolumeView = [[MPVolumeView alloc] initWithFrame: volumeHolder.bounds];
+    
+    // Add myVolumeView as a subView of the volumeHolder
+    [volumeHolder addSubview: myVolumeView];
+}
+#pragma mark - Convert second to hh:mm:ss
+- (NSString *)timeFormatted:(int)totalSeconds
+{
+    
+    int seconds = totalSeconds % 60;
+    int minutes = (totalSeconds / 60) % 60;
+    int hours = totalSeconds / 3600;
+    
+    return [NSString stringWithFormat:@"%02d:%02d:%02d",hours, minutes, seconds];
+}
+- (IBAction)pressInfoButton:(id)sender {
+    descriptionView = [[UIView alloc]init];
+    [descriptionView setFrame:self.infoView.frame];
+//    [descriptionView setBackgroundColor:[UIColor redColor]];
+    CATransition *transition = [CATransition animation];
+    [transition setDuration:0.5];
+    [transition setType:kCATransitionPush];
+    [transition setSubtype:kCATransitionFromLeft];
+    [transition setTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+    [descriptionView.layer addAnimation:transition forKey:nil];
+    [_infoView setHidden:YES];
+   [self.view addSubview:descriptionView];
+     //  [_titleLabel setText:@"abcxyz"];
+ //   UILabel *descriptionLabel = _titleLabel;
+ //   [descriptionView addSubview:_titleLabel];
+   
+    UITextView *descriptionText = [[UITextView alloc]initWithFrame:CGRectMake(0, _titleLabel.frame.size.height + 10, 320, descriptionView.frame.size.height - _titleLabel.frame.size.height)];
+    [descriptionText setUserInteractionEnabled:NO];
+    [descriptionView addSubview:descriptionText];
+    if (self.isPlayMovie) {
+        NSString *description = film.filmDescription;
+        [descriptionText setText:description];
+    }
+
+    UISwipeGestureRecognizer *swipeBack = [[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeBack)];
+    [swipeBack setDirection:UISwipeGestureRecognizerDirectionRight];
+    
+    [descriptionView addGestureRecognizer:swipeBack];
+}
+
+-(void)swipeBack
+{
+    [descriptionView removeFromSuperview];
+    [_infoView setHidden:NO];
+}
+@end

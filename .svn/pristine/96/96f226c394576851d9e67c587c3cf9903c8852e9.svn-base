@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>44F988F3-6370-4E60-A43F-28551C5530FA</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Z8Player</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+<<<<<<< .mine
+		<key>BAF2A8E0-D841-4531-8908-FE3680F3640E</key>
+		<string>https://10.88.16.31:8443/svn/Prototypes/trunk/SourceCode/iOS%20Training/Z8Play/Project/trunk/Z8Player</string>
+=======
+		<key>b01a2349-fd37-ef45-b303-39f83e911824</key>
+		<string>https://10.88.16.31:8443/svn/Prototypes/trunk/SourceCode/iOS%2520Training/Z8Play/Project/trunk/Z8Player</string>
+>>>>>>> .r495
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Z8Player.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+<<<<<<< .mine
+		<key>BAF2A8E0-D841-4531-8908-FE3680F3640E</key>
+=======
+		<key>b01a2349-fd37-ef45-b303-39f83e911824</key>
+>>>>>>> .r495
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+<<<<<<< .mine
+		<key>BAF2A8E0-D841-4531-8908-FE3680F3640E</key>
+		<string>https://fsoft.com.vn@10.88.16.31:8443/svn/Prototypes</string>
+=======
+		<key>b01a2349-fd37-ef45-b303-39f83e911824</key>
+		<string>https://10.88.16.31:8443/svn/Prototypes</string>
+>>>>>>> .r495
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+<<<<<<< .mine
+	<string>https://fsoft.com.vn@10.88.16.31:8443/svn/Prototypes/trunk/SourceCode/iOS%20Training/Z8Play/Project/trunk/Z8Player/Z8Player.xcodeproj</string>
+=======
+	<string>https://10.88.16.31:8443/svn/Prototypes/trunk/SourceCode/iOS%2520Training/Z8Play/Project/trunk/Z8Player/Z8Player.xcodeproj/project.xcworkspace</string>
+>>>>>>> .r495
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+<<<<<<< .mine
+	<string>BAF2A8E0-D841-4531-8908-FE3680F3640E</string>
+=======
+	<string>b01a2349-fd37-ef45-b303-39f83e911824</string>
+>>>>>>> .r495
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+<<<<<<< .mine
+			<string>BAF2A8E0-D841-4531-8908-FE3680F3640E</string>
+=======
+			<string>b01a2349-fd37-ef45-b303-39f83e911824</string>
+>>>>>>> .r495
+			<key>IDESourceControlWCCName</key>
+			<string>Z8Player</string>
+		</dict>
+	</array>
+</dict>
+</plist>

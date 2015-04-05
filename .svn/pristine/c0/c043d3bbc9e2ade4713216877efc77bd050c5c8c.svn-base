@@ -1,0 +1,112 @@
+//
+//  ZPDetailViewController.m
+//  Z8Player
+//
+//  Created by HieuSE on 8/15/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ZPDetailViewController.h"
+
+@interface ZPDetailViewController (){
+    BOOL isPlaying;
+}
+@property (strong, nonatomic) IBOutlet UIView *playerView;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+
+@property (strong, nonatomic) IBOutlet UIView *playerControlView;
+@property (strong, nonatomic) IBOutlet UIButton *playButton;
+@property (strong, nonatomic) IBOutlet UISlider *playSlider;
+@property (strong, nonatomic) IBOutlet FUISegmentedControl *segmentCtrl;
+
+@end
+
+@implementation ZPDetailViewController
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    NSString *urlLink = @"http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8";
+    // Do any additional setup after loading the view from its nib.
+    self.mediaplayer = [[MediaPlayer alloc] initWithURL:urlLink];
+    //  [self.view setFrame:]
+    
+    [self.mediaplayer.managerUtility loadingPlayer:self.playerView viewController:self urlLink:urlLink];
+    [self.activityIndicator startAnimating];
+    [self.mediaplayer.managerUtility playWithURL:urlLink];
+    [self.activityIndicator startAnimating];
+    
+    //segmentControl
+    [self setupView];
+    // [self.segmentCtrl setTintColor:kColor];
+    [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+    
+    isPlaying = YES;
+    self.optionIndices = [NSMutableIndexSet indexSetWithIndex:3];
+}
+
+-(void)setupView
+{
+    [self.segmentCtrl setSelectedFont:[UIFont boldFlatFontOfSize:16]];
+    [self.segmentCtrl setSelectedFontColor:[UIColor cloudsColor]];
+    [self.segmentCtrl setDeselectedFont:[UIFont flatFontOfSize:16]];
+    [self.segmentCtrl setDeselectedFontColor:[UIColor cloudsColor]];
+    [self.segmentCtrl setSelectedColor:[UIColor turquoiseColor]];
+    [self.segmentCtrl setDeselectedColor:[UIColor greenSeaColor]];
+    [self.segmentCtrl setDisabledColor:[UIColor silverColor]];
+    [self.segmentCtrl setDividerColor:[UIColor silverColor]];
+    [self.segmentCtrl setCornerRadius:5.0];
+}
+
+-(void)viewDidDisappear:(BOOL)animated
+{
+    [super viewDidDisappear:animated];
+    NSLog(@"Exit");
+    [self.mediaplayer.managerUtility stop];
+    
+    
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+-(void)openOk{
+    NSLog(@"Open ok");
+    
+    
+}
+-(void)openFailed{
+    NSLog(@"Open failed");
+}
+
+-(void)readyToPlay{
+    NSLog(@"ready to play");
+    [self.activityIndicator stopAnimating];
+}
+
+-(void)bufferingStart{
+    NSLog(@"buffering start");
+    [self.view bringSubviewToFront:self.activityIndicator];
+    [self.activityIndicator startAnimating];
+    
+}
+- (IBAction)playOrPause:(id)sender {
+    if (isPlaying) {
+        [self.playButton setImage:[UIImage imageNamed:@"pause.png"] forState:UIControlStateNormal];
+        isPlaying = NO;
+    }else{
+        [self.playButton setImage:[UIImage imageNamed:@"play.png"] forState:UIControlStateNormal];
+        isPlaying = YES;
+    }
+}
+@end

@@ -1,0 +1,18 @@
+//
+//  RtmpUtility.h
+//  Z8Player
+//
+//  Created by admin on 8/7/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ManagerUtilityPlayer.h"
+
+@interface RtmpUtility : ManagerUtilityPlayer
+@property (strong, nonatomic) id<IELMediaPlayer> rtmpPlayer;
+//-(void) playWithURL:(NSString*) urlLink;
+//-(void) stop;
+//-(void) pause;
+//-(void)loadingPlayer:(UIView *)objectView viewController:(UIViewController<ELPlayerMessageProtocol,IELMediaPlayer> *)viewController urlLink:(NSString*) urlLink;
+//-(void)seekToPos:(size_t)position  seekTime:(CMTime)seckTime ;
+@end

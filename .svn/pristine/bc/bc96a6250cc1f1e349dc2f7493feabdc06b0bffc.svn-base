@@ -1,0 +1,94 @@
+//
+//  LibraryAPI.m
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/6/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "LibraryAPI.h"
+#import "ChannelModel.h"
+#import "FilmModel.h"
+#define fullURL (@"http://10.88.106.51/")
+
+@implementation LibraryAPI
+NSMutableArray *homeChannels;
+NSMutableArray *homeFilms;
+
++ (LibraryAPI *)sharedInstance
+{
+    static LibraryAPI *_sharedInstance = nil;
+    static dispatch_once_t onePredicate;
+    dispatch_once(&onePredicate, ^{
+        _sharedInstance = [[LibraryAPI alloc]init];
+    });
+    return _sharedInstance;
+}
+
+//Get Channel Data
+- (NSArray*) getChannelList
+{
+    return homeChannels;
+}
+
+//Get Film Data
+- (NSArray*) getFilmList
+{
+    return homeFilms;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        [self initDemoData];
+    }
+    return self;
+}
+
+- (NSArray*) getDataFromURL:(NSString *)url withKey:(NSString *)key
+{
+    NSError *error;
+    NSDictionary *returnData;
+    NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@%@", fullURL, url]] options:NSDataReadingUncached error:&error];
+    if(error == nil)
+    {
+        returnData = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:&error];
+        return [returnData objectForKey:key];
+    }
+    NSLog(@"ERROR 101: Cannot get data");
+    return nil;
+}
+- (void) initDemoData
+{
+    homeChannels = [[NSMutableArray alloc] init];
+
+    NSArray *ChannelData = [self getDataFromURL:@"getChannels" withKey:@"ChannelData"];
+    if(ChannelData != nil)
+    {
+        for (int i = 0; i<[ChannelData count]; i++) {
+            ChannelModel *_channel =[[ChannelModel alloc] init];
+            _channel.mediaName = [ChannelData[i] objectForKey:@"mediaName"];
+            _channel.mediaURL = [NSURL URLWithString:[ChannelData[i] objectForKey:@"mediaURL"]];
+            _channel.mediaThumbnailImage = [ChannelData[i] objectForKey:@"mediaThumbnailImage"];
+            [homeChannels addObject:_channel];
+        }
+    }
+
+    homeFilms = [[NSMutableArray alloc] init];
+    NSArray *filmData  =[self getDataFromURL:@"getFilms" withKey:@"FilmData"];
+    if(filmData != nil)
+    {
+        for (int i = 0; i<[filmData count]; i++) {
+            FilmModel *_film =[[FilmModel alloc] init];
+            _film.mediaName = [filmData[i] objectForKey:@"mediaName"];
+            _film.mediaThumbnailImage = [filmData[i] objectForKey:@"mediaThumbnailImage"];
+            _film.filmDescription = [filmData[i] objectForKey:@"filmDescription"];
+            _film.mediaURL = [NSURL URLWithString:[filmData[i] objectForKey:@"mediaURL"]];
+            [homeFilms addObject:_film];
+        }
+    }
+}
+@end

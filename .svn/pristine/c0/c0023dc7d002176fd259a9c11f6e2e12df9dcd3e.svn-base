@@ -1,0 +1,13 @@
+//
+//  FavoriteViewController.h
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/21/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "BaseViewController.h"
+
+@interface ZPFavoriteViewController : BaseViewController
+
+@end

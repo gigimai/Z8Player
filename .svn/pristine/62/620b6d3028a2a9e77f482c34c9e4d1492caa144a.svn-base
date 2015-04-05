@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>1C40E111-EE97-43FD-9E6C-E77B56B6173D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Z8Player</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>FC1BA54E-52D6-47C7-909D-CBDEF6D6E0FC</key>
+		<string>https://s301-dtv-svn.fsoft.fpt.vn:8443/svn/Prototypes/trunk/SourceCode/iOS%20Training/Z8Play</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Project/trunk/Z8Player/Z8Player.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>FC1BA54E-52D6-47C7-909D-CBDEF6D6E0FC</key>
+		<string>../../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+		<key>FC1BA54E-52D6-47C7-909D-CBDEF6D6E0FC</key>
+		<string>https://s301-dtv-svn.fsoft.fpt.vn:8443/svn/Prototypes</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://s301-dtv-svn.fsoft.fpt.vn:8443/svn/Prototypes/trunk/SourceCode/iOS%20Training/Z8Play/Project/trunk/Z8Player/Z8Player.xcodeproj</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>FC1BA54E-52D6-47C7-909D-CBDEF6D6E0FC</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>FC1BA54E-52D6-47C7-909D-CBDEF6D6E0FC</string>
+			<key>IDESourceControlWCCName</key>
+			<string>Z8Play</string>
+		</dict>
+	</array>
+</dict>
+</plist>

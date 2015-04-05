@@ -1,0 +1,21 @@
+//
+//  ChannelModel.m
+//  Z8Player
+//
+//  Created by Do Nhat Khanh on 8/7/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ChannelModel.h"
+
+@implementation ChannelModel
+- (id)initWithName:(NSString *)name andMediaURL:(NSString *)mediaURL andThumnailImage:(NSString *)thumnailImage
+{
+    if (self = [super init]) {
+        self.mediaName = name;
+        self.mediaURL = mediaURL;
+        self.mediaThumbnailImage = thumnailImage;
+    }
+    return self;
+}
+@end

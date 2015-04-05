@@ -1,0 +1,13 @@
+//
+//  MediaModel.m
+//  Z8Player
+//
+//  Created by Do Nhat Khanh on 8/7/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "MediaModel.h"
+
+@implementation MediaModel
+
+@end

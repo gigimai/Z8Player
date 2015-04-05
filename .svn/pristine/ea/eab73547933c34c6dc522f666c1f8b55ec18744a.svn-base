@@ -1,0 +1,132 @@
+//
+//  BaseViewController.m
+//  Z8Player
+//
+//  Created by HieuSE on 8/6/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "BaseViewController.h"
+#import "ZPHomeViewController.h"
+#import "ZPLiveTVViewController.h"
+@interface BaseViewController ()
+{
+    //@property(nonatomic, strong) BTSimpleSideMenu *sidebar;
+    BTSimpleSideMenu *sidebar;
+}
+@end
+@class ZPHomeViewController;
+@implementation BaseViewController
+//@synthesize sidebar;
+//@synthesize optionIndices;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view.
+    UIBarButtonItem *menuButton = [[UIBarButtonItem alloc]initWithImage:[UIImage imageNamed:@"menuIcon2.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(showSidebar:)];
+    UIBarButtonItem *negativeSpacer = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    negativeSpacer.width = -10;
+    [self.navigationItem setLeftBarButtonItems:[NSArray arrayWithObjects:negativeSpacer,menuButton,nil]];
+    
+    
+    //self.optionIndices = [NSMutableIndexSet indexSetWithIndex:-1];
+    
+    // Create menu
+    sidebar.delegate = self;
+    
+    
+    BTSimpleMenuItem *homeItem = [[BTSimpleMenuItem alloc]initWithTitle:@"Home"
+                                                               image:[UIImage imageNamed:@"icon_home"]
+                                                        onCompletion:^(BOOL success, BTSimpleMenuItem *item) {
+                                                            NSLog(@"I am Item Home");
+                                                            ZPHomeViewController *vc =  [[ZPHomeViewController alloc]initWithNibName:@"ZPHomeViewController" bundle:nil];
+                                                            [self.navigationController pushViewController:vc animated:YES];
+                                                        }];
+
+    BTSimpleMenuItem *liveTVItem = [[BTSimpleMenuItem alloc]initWithTitle:@"LiveTV"
+                                                                    image:[UIImage imageNamed:@"liveTVIcon"]
+                                                        onCompletion:^(BOOL success, BTSimpleMenuItem *item) {
+                                                            NSLog(@"I am Item LiveTV");
+                                                            ZPLiveTVViewController *vc =  [[ZPLiveTVViewController alloc]initWithNibName:@"ZPLiveTVViewController" bundle:nil];
+                                                            [self.navigationController pushViewController:vc animated:YES];
+                                                        }];
+    
+    BTSimpleMenuItem *filmItem = [[BTSimpleMenuItem alloc]initWithTitle:@"Film"
+                                                                  image:[UIImage imageNamed:@"movieIcon"]
+                                                        onCompletion:^(BOOL success, BTSimpleMenuItem *item) {
+                                                            NSLog(@"I am Item Film");
+                                                        }];
+    
+    BTSimpleMenuItem *favItem = [[BTSimpleMenuItem alloc]initWithTitle:@"Favourite"
+                                                                 image:[UIImage imageNamed:@"iconFav"]
+                                                        onCompletion:^(BOOL success, BTSimpleMenuItem *item) {
+                                                            NSLog(@"I am Item Fav");
+                                                        }];
+    
+    BTSimpleMenuItem *settingItem = [[BTSimpleMenuItem alloc]initWithTitle:@"Setting"
+                                                                     image:[UIImage imageNamed:@"iconSetting"]
+                                                        onCompletion:^(BOOL success, BTSimpleMenuItem *item) {
+                                                            NSLog(@"I am Item Setting");
+                                                        }];
+    
+    sidebar = [[BTSimpleSideMenu alloc]initWithItem:@[homeItem, liveTVItem, filmItem, favItem, settingItem]
+                                 addToViewController:self];
+    sidebar.backgroundColor = [UIColor grayColor];
+}
+
+- (void)showSidebar:(id)sender
+{
+    NSLog(@"Sidebar");
+    [sidebar toggleMenu];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma -mark BTSimpleSideMenuDelegate
+
+-(void)BTSimpleSideMenu:(BTSimpleSideMenu *)menu didSelectItemAtIndex:(NSInteger)index {
+    NSLog(@"Item Cliecked : %ld", (long)index);
+    if (index == 0)
+    {
+        
+    }
+    else if(index == 1)
+    {
+        
+    }
+    else if(index == 2)
+    {
+        
+    }
+    else if(index == 3)
+    {
+        
+    } else
+    {
+        
+    }
+}
+
+-(void)BTSimpleSideMenu:(BTSimpleSideMenu *)menu selectedItemTitle:(NSString *)title {
+    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"Menu Clicked"
+                                                   message:[NSString stringWithFormat:@"Item Title : %@", title]
+                                                  delegate:self
+                                         cancelButtonTitle:@"Dismiss"
+                                         otherButtonTitles:nil, nil];
+    [alert show];
+}
+@end

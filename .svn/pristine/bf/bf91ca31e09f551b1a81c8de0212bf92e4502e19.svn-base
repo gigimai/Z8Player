@@ -1,0 +1,13 @@
+//
+//  DevelopTeamViewController.h
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/28/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@interface DevelopTeamViewController : UIViewController
+
+@end

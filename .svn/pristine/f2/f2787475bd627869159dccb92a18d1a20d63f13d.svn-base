@@ -1,0 +1,19 @@
+//
+//  ZPMovie.h
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/19/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface ZPMovie : NSObject
+
+@property (nonatomic,strong) NSString *title;
+@property (nonatomic,strong) NSURL *link;
+@property (nonatomic,strong) UIImage *posterImage;
+
+
+-(id)initWithTitle : (NSString *)title urlLink : (NSURL *)link posterImage : (UIImage *)posterImage;
+@end

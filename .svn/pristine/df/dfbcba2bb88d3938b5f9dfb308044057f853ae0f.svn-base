@@ -1,0 +1,145 @@
+//
+//  ZPMoviesViewController.m
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/19/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ZPMoviesViewController.h"
+#import "ZPMovie.h"
+#import "UIColor+FlatUI.h"
+#import "UIFont+FlatUI.h"
+#import "ZPDetailViewController.h"
+
+
+@interface ZPMoviesViewController () <UICollectionViewDataSource,UICollectionViewDelegate,UICollectionViewDelegateFlowLayout>{
+    NSArray *moviesArray;
+}
+
+@property (nonatomic,strong) UICollectionView *movieCollection;
+
+
+@end
+
+@implementation ZPMoviesViewController
+@synthesize movieCollection;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    [self setupView];
+    [self prepareData];
+}
+
+//-(void)viewWillAppear:(BOOL)animated
+//{
+//    [super viewWillAppear:animated];
+//    [movieCollection reloadData];
+//}
+
+-(void)setupView
+{
+    [self setTitle:@"Movies"];
+    UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc]init];
+    [flowLayout setScrollDirection:UICollectionViewScrollDirectionVertical];
+ //   [flowLayout setItemSize:CGSizeMake(90.0, 90.0)];
+    [flowLayout setSectionInset:UIEdgeInsetsMake(10,10,10,10)];
+    
+    movieCollection = [[UICollectionView alloc]initWithFrame:CGRectMake(0, 0, 320, self.view.frame.size.height - 66) collectionViewLayout:flowLayout];
+    movieCollection.delegate = self;
+    movieCollection.dataSource = self;
+    [movieCollection registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"movieCell"];
+    
+    [movieCollection setBackgroundColor:[UIColor whiteColor]];
+    [self.view addSubview:movieCollection];
+}
+
+-(void)prepareData
+{
+    moviesArray = [[NSArray alloc]initWithObjects:[[ZPMovie alloc]initWithTitle:@"Brave" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Brave.2012.1080p.BRrip.x264.YIFY"] posterImage:[UIImage imageNamed:@"1brave.png"]],
+                   [[ZPMovie alloc] initWithTitle:@"Frozen" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Frozen.2013.1080p.BluRay.x264.YIFY"] posterImage:[UIImage imageNamed:@"2frozen"]],
+                   [[ZPMovie alloc]initWithTitle:@"Tinkerbell" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:The.Pirate.Fairy.2014.720p.BluRay.x264.YIFY"] posterImage:[UIImage imageNamed:@"3tinker2014.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Wreck it Ralph" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Wreck.it.Ralph.2012.1080p.BrRip.x264.BOKUTOX.YIFY"] posterImage:[UIImage imageNamed:@"4Ralph.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Car : Airmater" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Cars.2.Air.Mater"] posterImage:[UIImage imageNamed:@"Airmater.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"For the birds" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Pixar.For.The.Birds"] posterImage:[UIImage imageNamed:@"bird.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"The blue Umbrealla" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:The.Blue.Umbrella"] posterImage:[UIImage imageNamed:@"Blue.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Me,myself & Scarlet" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Brave.2012.1080p.BRrip.x264.YIFY"] posterImage:[UIImage imageNamed :@"brand.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Geri's game" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Geris.Game.Pixar"] posterImage:[UIImage imageNamed:@"Geri.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Heaven" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Heaven"] posterImage:[UIImage imageNamed:@"heaven.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Lifted" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Pixar.Lifted"] posterImage:[UIImage imageNamed:@"Lifted.png"]],
+                   [[ZPMovie alloc]initWithTitle:@"Presto" urlLink:[NSURL URLWithString:@"rtmp://10.88.107.5/vod/mp4:Presto"] posterImage:[UIImage imageNamed:@"presto.png"]],nil];
+
+}
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark - UICollectionViewDataSource
+
+-(NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+    return [moviesArray count];
+}
+
+-(UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellIdentifier = @"movieCell";
+    
+    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:cellIdentifier forIndexPath:indexPath];
+    [[cell.contentView subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
+
+    [cell setBackgroundColor:[UIColor whiteColor]];
+    ZPMovie *movie = [moviesArray objectAtIndex:indexPath.row];
+
+    UIImageView *moviePoster = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 90, 117)];
+    [moviePoster setContentMode:UIViewContentModeScaleAspectFit];
+    [moviePoster setImage:movie.posterImage];
+    [moviePoster setClipsToBounds:YES];
+
+    UILabel *movieTitleLbl = [[UILabel alloc]initWithFrame:CGRectMake(5, moviePoster.frame.size.height, cell.frame.size.width, cell.frame.size.height - moviePoster.frame.size.height)];
+
+    [movieTitleLbl setNumberOfLines:2];
+    [movieTitleLbl setText:movie.title];
+    [movieTitleLbl setFont:[UIFont flatFontOfSize:14]];
+    [movieTitleLbl setTextAlignment:NSTextAlignmentJustified];
+    [movieTitleLbl sizeToFit];
+    [movieTitleLbl setClipsToBounds:YES];
+    [cell.contentView addSubview:movieTitleLbl];
+
+    [cell.contentView addSubview: moviePoster];
+    
+    return cell;
+}
+
+#pragma mark - UICollectionViewFlowLayout
+
+-(CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    return CGSizeMake(90.0, 157.0);
+}
+
+#pragma mark - UICollectionViewDelegate
+
+-(void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    ZPMovie *movie = [moviesArray objectAtIndex:indexPath.row];
+    ZPDetailViewController *viewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil withURLString:[movie.link absoluteString]];
+    viewController.movieTitle = movie.title;
+    [self.navigationController pushViewController:viewController animated:YES];
+}
+
+
+@end

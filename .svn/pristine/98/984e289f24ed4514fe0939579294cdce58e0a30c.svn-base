@@ -1,0 +1,24 @@
+//
+//  LibraryAPI.h
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/6/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface LibraryAPI : NSObject
+
+@property(nonatomic, strong) NSMutableArray *filmEditedArr;
+@property(nonatomic, strong) NSMutableArray *channelEditedArr;
+
++ (LibraryAPI *)sharedInstance;
++ (NSString *)getPathToArchive:(NSString *)keyObject;
+
+- (NSArray*) getChannelList;
+- (NSArray*) getFilmList;
+- (NSArray *)getFilmListEdited;
+- (NSArray *)getChannelListEdited;
+
+@end

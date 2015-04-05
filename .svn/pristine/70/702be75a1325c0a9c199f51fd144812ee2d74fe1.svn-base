@@ -1,0 +1,15 @@
+//
+//  ZPFavoriteViewController.h
+//  Z8Player
+//
+//  Created by Khanhhoa Mai on 8/26/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "BaseViewController.h"
+
+@interface ZPFavoriteViewController : BaseViewController
+@property (strong, nonatomic) IBOutlet UISegmentedControl *segmentCtrl;
+- (IBAction)changeSegment:(id)sender;
+
+@end

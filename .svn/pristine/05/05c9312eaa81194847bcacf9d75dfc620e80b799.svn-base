@@ -1,0 +1,205 @@
+//
+//  HomeViewController.m
+//  Z8Player
+//
+//  Created by HieuSE on 8/13/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "ZPHomeViewController.h"
+
+@interface ZPHomeViewController (){
+    CGFloat dummyViewHeight;
+    UIImageView *topImage;
+
+}
+
+@end
+
+@implementation ZPHomeViewController
+@synthesize theTableView;
+@synthesize dataArr;
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
+{
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self)
+    {
+        self.title = NSLocalizedString(@"Z8 Play", @"Z8 Play");
+    }
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    // Do any additional setup after loading the view from its nib.
+    
+    [self preperaData];
+    
+    // Register the table cell
+    [self.theTableView registerClass:[ORGContainerCell class] forCellReuseIdentifier:@"ORGContainerCell"];
+    
+    // Add observer that will allow the nested collection cell to trigger the view controller select row at index path
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didSelectItemFromCollectionView:) name:@"didSelectItemFromCollectionView" object:nil];
+    [self.theTableView setFrame:CGRectMake(0, self.view.frame.origin.y + 44, self.view.frame.size.width, self.view.frame.size.height - 44)];
+    self.theTableView.delegate = self;
+    self.theTableView.dataSource = self;
+    
+    self.optionIndices = [NSMutableIndexSet indexSetWithIndex:0];
+    
+
+    [self.theTableView setShowsVerticalScrollIndicator:NO];
+    
+    topImage = [[UIImageView alloc]initWithFrame:CGRectMake(0, 0, 320, 170)];
+    [topImage setImage:[UIImage imageNamed:@"guardians_poster_via_marvel.jpg"]];
+}
+
+- (void)preperaData
+{
+    NSArray *chanelsArr;
+    NSArray *filmsArr;
+    if (!chanelsArr) {
+        chanelsArr = [[LibraryAPI sharedInstance]getChannelList];
+    }
+    
+    NSMutableArray *channelsDict = [[NSMutableArray alloc]init];
+    for (ChannelModel *chanel in chanelsArr) {
+        NSDictionary *channelDict = @{@"title": chanel.mediaName,
+                                      @"imageURL": chanel.mediaThumbnailImage};
+        [channelsDict addObject:channelDict];
+    }
+    NSDictionary *channelsViewDict = @{@"description":@"Most viewed channels",
+                                       @"articles":channelsDict};
+    if (!filmsArr) {
+        filmsArr = [[LibraryAPI sharedInstance]getFilmList];
+    }
+    
+    NSMutableArray *filmsDict = [[NSMutableArray alloc]init];
+    for (FilmModel *film in filmsArr) {
+        NSDictionary *filmlDict = @{@"title": film.mediaName,
+                                    @"imageURL": film.mediaThumbnailImage};
+        [filmsDict addObject:filmlDict];
+    }
+    NSDictionary *filmsViewDict = @{@"description":@"Most viewed movies",
+                                    @"articles":filmsDict};
+    
+    dataArr = [[NSArray alloc]initWithObjects:channelsViewDict,filmsViewDict, nil];
+    
+    [self.theTableView reloadData];
+}
+
+
+#pragma mark- UITableViewMethod
+
+
+
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+    if (section == 0) {
+        dummyViewHeight = 214;
+        return 214;
+    }
+    dummyViewHeight = 44;
+    return 44.0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 180.0;
+}
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return [dataArr count];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return 1;
+}
+
+// Customize the appearance of table view cells.
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *cellIdentifier = @"ORGContainerCell";
+    ORGContainerCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
+    if (!cell) {
+        cell = [[ORGContainerCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellIdentifier];
+    }
+    NSDictionary *cellData = dataArr[indexPath.section];
+    NSArray *articleData = [cellData objectForKey:@"articles"];
+    [cell setCollectionData:articleData];
+    return cell;
+}
+
+-(UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
+{
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"tableHeaderCell"];
+    if (cell ==nil) {
+        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"tableHeaderCell"];
+    }
+    NSDictionary *sectionData = dataArr[section];
+    NSString *header = [sectionData objectForKey:@"description"];
+    if (section == 0) {
+
+        [cell addSubview:topImage];
+        UILabel *myLbl = [[UILabel alloc]initWithFrame:CGRectMake(cell.frame.origin.x + 10, cell.frame.origin.y +topImage.frame.size.height, 320, 44)];
+        [myLbl setText:header];
+        [myLbl setTextColor:[UIColor tangerineColor]];
+        [cell addSubview:myLbl];
+
+        
+    }else{
+    [cell.textLabel setText:header];
+    [cell.textLabel setTextColor:[UIColor tangerineColor]];
+    }
+    UIView *dummyView = [[UIView alloc]initWithFrame:CGRectMake(self.theTableView.bounds.origin.x, self.theTableView.bounds.origin.y, self.theTableView.bounds.size.width, dummyViewHeight)];
+    self.theTableView.tableHeaderView = dummyView;
+    [self.theTableView setContentInset:UIEdgeInsetsMake(-dummyViewHeight, 0, 0, 0)];
+    return  cell;
+}
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // Return NO if you do not want the specified item to be editable.
+    return NO;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    // This code is commented out in order to allow users to click on the collection view cells.
+    //    if (!self.detailViewController) {
+    //        self.detailViewController = [[ORGDetailViewController alloc] initWithNibName:@"ORGDetailViewController" bundle:nil];
+    //    }
+    //  //  NSDate *object = _objects[indexPath.row];
+    //   // self.detailViewController.detailItem = object;
+    //    [self.navigationController pushViewController:self.detailViewController animated:YES];
+}
+
+#pragma mark - NSNotification to select table cell
+
+- (void) didSelectItemFromCollectionView:(NSNotification *)notification
+{
+    NSDictionary *cellData = [notification object];
+    if (cellData)
+    {
+        if (!self.detailViewController) {
+            self.detailViewController = [[ZPDetailViewController alloc]initWithNibName:@"ZPDetailViewController" bundle:nil];
+        }
+        [self.navigationController pushViewController:self.detailViewController animated:YES];
+        
+    }
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"didSelectItemFromCollectionView" object:nil];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+@end

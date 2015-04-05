@@ -1,0 +1,25 @@
+//
+//  ZPDetailViewController.h
+//  Z8Player
+//
+//  Created by HieuSE on 8/15/14.
+//  Copyright (c) 2014 FSOFT. All rights reserved.
+//
+
+#import "BaseViewController.h"
+#import "UIColor+FlatUI.h"
+#import "FUISegmentedControl.h"
+#import "UIFont+FlatUI.h"
+#import "MediaPlayer.h"
+
+@interface ZPDetailViewController : UIViewController<ELPlayerMessageProtocol,IELMediaPlayer,UIScrollViewDelegate>
+
+@property (strong, nonatomic) MediaPlayer *mediaplayer;
+@property (nonatomic, strong) NSString *urlLink;
+@property (nonatomic,strong) NSString *movieTitle;
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil withURLString:(NSString *)linkStr;
+- (IBAction)didChangeSegment:(id)sender;
+
+
+@end
